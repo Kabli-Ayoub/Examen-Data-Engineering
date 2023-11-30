@@ -1,16 +1,16 @@
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import umap.umap_ as umap
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
+
 def dim_red(mat, p, method):
-
-
     '''
     Perform dimensionality reduction
 
@@ -22,12 +22,17 @@ def dim_red(mat, p, method):
     ------
         red_mat : NxP list such that p<<m
     '''
-
     if method == 'ACP':
-        pass
+        red_mat = mat[:, :p]
 
     elif method == 'TSNE':
-        pass
+        # TNSE does'nt allow more than 3 component
+        p = 3
+        r_mat = TSNE(n_components=p,
+                     learning_rate='auto',
+                     init='random',
+                     perplexity=3).fit_transform(mat)
+        red_mat = r_mat[:, :p]
 
     elif method == 'UMAP':
 
@@ -41,8 +46,8 @@ def dim_red(mat, p, method):
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
 
     return red_mat
-
-
+  
+  
 def clust(mat, k):
     '''
     Perform clustering
@@ -55,11 +60,9 @@ def clust(mat, k):
     ------
         pred : list of predicted labels
     '''
-
     kmeans = KMeans(n_clusters=k)  
     kmeans.fit(mat)
     pred = kmeans.labels_
-
     return pred
 
 
