@@ -4,6 +4,10 @@ from sentence_transformers import SentenceTransformer
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 import numpy as np
+import pandas as pd
+import seaborn as sns
+import umap.umap_ as umap
+import matplotlib.pyplot as plt
 
 
 def dim_red(mat, p, method):
@@ -31,13 +35,19 @@ def dim_red(mat, p, method):
         red_mat = r_mat[:, :p]
 
     elif method == 'UMAP':
-        red_mat = mat[:, :p]
+
+        umap_model = umap.UMAP(random_state=42, n_components=p)
+
+        red_mat = umap_model.fit_transform(mat)
+        
+        return red_mat
 
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
 
     return red_mat
-
+  
+  
 def clust(mat, k):
     '''
     Perform clustering
@@ -50,8 +60,9 @@ def clust(mat, k):
     ------
         pred : list of predicted labels
     '''
-
-    pred = np.random.randint(k, size=len(corpus))
+    kmeans = KMeans(n_clusters=k)  
+    kmeans.fit(mat)
+    pred = kmeans.labels_
     return pred
 
 
@@ -65,19 +76,37 @@ k = len(set(labels))
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
+num_iterations=2
+nmi_scores = []
+ari_scores = []
+
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'AFC', 'UMAP']
 for method in methods:
-    # Perform dimensionality reduction
     red_emb = dim_red(embeddings, 20, method)
+    for _ in range(num_iterations):
+        # perform clustering
+        pred = clust(red_emb, k)
 
-    # Perform clustering
-    pred = clust(red_emb, k)
+        # evaluate clustering results
+        nmi_score = normalized_mutual_info_score(pred, labels)
+        ari_score = adjusted_rand_score(pred, labels)
 
-    # Evaluate clustering results
-    nmi_score = normalized_mutual_info_score(pred, labels)
-    ari_score = adjusted_rand_score(pred, labels)
+        nmi_scores.append(nmi_score)
+        ari_scores.append(ari_score)
 
-    # Print results
-    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
+        if _ == num_iterations - 1:
+            fig, axs = plt.subplots(1, 2, figsize=(16, 4))
+            sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=labels, palette='viridis', legend='full', ax=axs[0])
+            axs[0].set_title(f'{method} visualisation with truee labels - Iteration {_ + 1}')
+            
+
+            sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=pred, palette='viridis', legend='full', ax=axs[1])
+            axs[1].set_title(f'{method} Clustering - Iteration {_ + 1}')
+            plt.show()
+# Calculate average scores
+average_nmi = sum(nmi_scores) / num_iterations
+average_ari = sum(ari_scores) / num_iterations
+
+print(f'Average NMI on {num_iterations}: {average_nmi:.2f}\nAverage ARI on {num_iterations}: {average_ari:.2f}')
 
