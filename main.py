@@ -114,7 +114,6 @@ for method in methods:
             fig, axs = plt.subplots(1, 2, figsize=(16, 4))
             sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=labels, palette='viridis', legend='full', ax=axs[0])
             axs[0].set_title(f'{method} visualisation with truee labels - Iteration {_ + 1}')
-            
 
             sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=pred, palette='viridis', legend='full', ax=axs[1])
             axs[1].set_title(f'{method} Clustering - Iteration {_ + 1}')
