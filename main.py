@@ -109,6 +109,7 @@ labels = data.iloc[:, -1]
 
 k = len(set(labels))
 
+
 # embedding
 # model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 # embeddings = model.encode(corpus)
