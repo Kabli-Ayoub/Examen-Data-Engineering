@@ -1,13 +1,15 @@
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
-from sklearn.manifold import TSNE
-from sklearn.cluster import KMeans
+from prince import PCA
 import numpy as np
 import pandas as pd
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 import seaborn as sns
 import umap.umap_ as umap
 import matplotlib.pyplot as plt
+
 
 
 def dim_red(mat, p, method):
@@ -22,11 +24,22 @@ def dim_red(mat, p, method):
     ------
         red_mat : NxP list such that p<<m
     '''
+
     if method == 'ACP':
-        red_mat = mat[:, :p]
+    
+        df = pd.DataFrame(embeddings)
+        # initialiser un model de ACP avec k composantes principales
+        acp_model = PCA(n_components=p)
+
+        # application de ACP sur notre dataset
+        acp_model.fit(df)
+        # renvoyer la dataset reduit
+        df_acp = acp_model.transform(df).values
+
+        red_mat = df_acp[:, :p]
 
     elif method == 'TSNE':
-        # TNSE does'nt allow more than 3 component
+        # TNSE does'nt allow more than 3 components
         p = 3
         r_mat = TSNE(n_components=p,
                      learning_rate='auto',
@@ -46,8 +59,7 @@ def dim_red(mat, p, method):
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
 
     return red_mat
-  
-  
+
 def clust(mat, k):
     '''
     Perform clustering
@@ -60,9 +72,11 @@ def clust(mat, k):
     ------
         pred : list of predicted labels
     '''
+
     kmeans = KMeans(n_clusters=k)  
     kmeans.fit(mat)
     pred = kmeans.labels_
+
     return pred
 
 
@@ -83,6 +97,7 @@ ari_scores = []
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'AFC', 'UMAP']
 for method in methods:
+  
     red_emb = dim_red(embeddings, 20, method)
     for _ in range(num_iterations):
         # perform clustering
