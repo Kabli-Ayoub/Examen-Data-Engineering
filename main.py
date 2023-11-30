@@ -1,3 +1,5 @@
+import os
+
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
@@ -10,6 +12,7 @@ import seaborn as sns
 import umap.umap_ as umap
 import matplotlib.pyplot as plt
 
+import warnings
 
 
 def dim_red(mat, p, method):
@@ -26,7 +29,7 @@ def dim_red(mat, p, method):
     '''
 
     if method == 'ACP':
-    
+
         df = pd.DataFrame(embeddings)
         # initialiser un model de ACP avec k composantes principales
         acp_model = PCA(n_components=p)
@@ -49,16 +52,17 @@ def dim_red(mat, p, method):
 
     elif method == 'UMAP':
 
-        umap_model = umap.UMAP(random_state=42, n_components=p)
+        umap_model = umap.UMAP(n_components=p)
 
         red_mat = umap_model.fit_transform(mat)
-        
+
         return red_mat
 
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
 
     return red_mat
+
 
 def clust(mat, k):
     '''
@@ -73,31 +77,53 @@ def clust(mat, k):
         pred : list of predicted labels
     '''
 
-    kmeans = KMeans(n_clusters=k)  
+    kmeans = KMeans(init='k-means++',
+                    n_init=20,
+                    n_clusters=k)
     kmeans.fit(mat)
     pred = kmeans.labels_
 
     return pred
 
 
+"""
+def save_as_csv(x, y):
+    os.makedirs(name='data', exist_ok=True)
+    df_x = pd.DataFrame(x)
+    df_y = pd.DataFrame(y, columns=['y'])
+
+    df_new = pd.concat([df_x, df_y], axis=1)
+    df_new.to_csv(path_or_buf='./data/embedding.csv')
+
+"""
+
 # import data
-ng20 = fetch_20newsgroups(subset='test')
-corpus = ng20.data[:2000]
-labels = ng20.target[:2000]
+# ng20 = fetch_20newsgroups(subset='test')
+# corpus = ng20.data[:2000]
+# labels = ng20.target[:2000]
+
+
+data = pd.read_csv(filepath_or_buffer='./data/embedding.csv')
+embeddings = data.iloc[:, :-1]
+labels = data.iloc[:, -1]
+
 k = len(set(labels))
 
-# embedding
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-embeddings = model.encode(corpus)
 
-num_iterations=2
+# embedding
+# model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+# embeddings = model.encode(corpus)
+
+# save_as_csv(embeddings, labels)
+
+num_iterations = 2
 nmi_scores = []
 ari_scores = []
 
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
-  
+
     red_emb = dim_red(embeddings, 20, method)
     for _ in range(num_iterations):
         # perform clustering
@@ -118,9 +144,9 @@ for method in methods:
             sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=pred, palette='viridis', legend='full', ax=axs[1])
             axs[1].set_title(f'{method} Clustering - Iteration {_ + 1}')
             plt.savefig(f'./fig/{method} + clustering.png')
-# Calculate average scores
+    # Calculate average scores
     average_nmi = sum(nmi_scores) / num_iterations
     average_ari = sum(ari_scores) / num_iterations
 
-    print(f'Average NMI on {num_iterations} for {method}: {average_nmi:.2f}\nAverage ARI on {num_iterations} for {method}: {average_ari:.2f}')
-
+    print(f'Average NMI on {num_iterations} iterations for {method}: {average_nmi:.2f}'
+          f'\nAverage ARI on {num_iterations} iterations for {method}: {average_ari:.2f} \n')

@@ -1,5 +1,4 @@
 scikit-learn
-sentence-transformers
 prince
 numpy
 pandas
