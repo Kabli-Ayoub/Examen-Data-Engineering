@@ -38,7 +38,6 @@ def dim_red(mat, p, method):
 
     return red_mat
 
-
 def clust(mat, k):
     '''
     Perform clustering
@@ -52,14 +51,8 @@ def clust(mat, k):
         pred : list of predicted labels
     '''
 
-    km = KMeans(n_clusters=k,
-                init='random',
-                n_init=10,
-                tol=1e-04,
-                max_iter=300,
-                random_state=0).fit(mat)
-
-    return km.labels_
+    pred = np.random.randint(k, size=len(corpus))
+    return pred
 
 
 # import data
