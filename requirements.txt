@@ -1,3 +1,8 @@
 scikit-learn
 sentence-transformers
 prince
+numpy
+pandas
+seaborn
+matplotlib
+umap-learn

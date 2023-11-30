@@ -95,7 +95,7 @@ nmi_scores = []
 ari_scores = []
 
 # Perform dimensionality reduction and clustering for each method
-methods = ['ACP', 'AFC', 'UMAP']
+methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
   
     red_emb = dim_red(embeddings, 20, method)
@@ -118,10 +118,10 @@ for method in methods:
 
             sns.scatterplot(x=red_emb[:, 0], y=red_emb[:, 1], hue=pred, palette='viridis', legend='full', ax=axs[1])
             axs[1].set_title(f'{method} Clustering - Iteration {_ + 1}')
-            plt.show()
+            plt.savefig(f'./fig/{method} + clustering.png')
 # Calculate average scores
-average_nmi = sum(nmi_scores) / num_iterations
-average_ari = sum(ari_scores) / num_iterations
+    average_nmi = sum(nmi_scores) / num_iterations
+    average_ari = sum(ari_scores) / num_iterations
 
-print(f'Average NMI on {num_iterations}: {average_nmi:.2f}\nAverage ARI on {num_iterations}: {average_ari:.2f}')
+    print(f'Average NMI on {num_iterations} for {method}: {average_nmi:.2f}\nAverage ARI on {num_iterations} for {method}: {average_ari:.2f}')
 
