@@ -18,6 +18,7 @@ Ce projet simule un environnement de développement collaboratif où plusieurs d
 - main.py: Fichier principal pour l'évaluation des différentes approches (ACP+kmeans, TSE+kmeans, UMAP+kmeans) à l'aide des métriques NMI, ARI et Accuracy.
 
 - data: Contient les données textuelles NG20 utilisées dans le projet.
+- fig: Contient les figures des approches Reduction de dimension + clustering
 
 ## Guide de Développement
 - Cloner le Repository:
