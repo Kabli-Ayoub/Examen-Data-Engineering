@@ -32,7 +32,7 @@ git clone git@github.com:Kabli-Ayoub/Examen-Data-Engineering.git
 
 L'image docker se situe en: 
 ```bash
-$ docker pull goamegah/examde
+$ docker pull goamegah/examde:latest
 ```
 Pour construire l'image, utiliser la commande suivante:
 

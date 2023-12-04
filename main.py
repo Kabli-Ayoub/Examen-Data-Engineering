@@ -2,7 +2,7 @@ import os
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 from prince import PCA
 import numpy as np
 import pandas as pd
